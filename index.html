@@ -325,9 +325,9 @@ function drawCard(d) {
 function drawBrand(ctx, cx, y, fontSize) {
   ctx.font = `900 ${fontSize}px "Segoe UI", system-ui, sans-serif`;
   const parts = [
-    { text: 'BET_',    color: 'white' },
-    { text: 'DATA_',   color: '#60a5fa' },
-    { text: 'SCIENCE', color: 'white' }
+    { text: 'FUTBOL_',    color: 'white' },
+    { text: 'ALGORITMICO_',   color: '#60a5fa' },
+    { text: 'IA', color: 'white' }
   ];
   const full = parts.map(p => p.text).join('');
   const totalW = ctx.measureText(full).width;
