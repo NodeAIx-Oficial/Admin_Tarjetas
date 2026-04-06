@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BDS Admin – Tarjetas</title>
+<style>
+  :root {
+    --bg: #0d0f14; --bg2: #13161e; --bg3: #1a1e29;
+    --border: rgba(255,255,255,0.07); --accent: #3b82f6;
+    --text: #f1f5f9; --text2: #94a3b8; --text3: #475569;
+    --green: #10b981; --red: #ef4444; --gold: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+
+  /* ---- LOGIN ---- */
+  #login-screen {
+    position: fixed; inset: 0; background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 20px; z-index: 999;
+  }
+  #login-screen h2 { font-size: 22px; font-weight: 800; letter-spacing: 2px; }
+  #login-screen h2 span { color: var(--accent); }
+  #login-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 36px 40px; display: flex; flex-direction: column; gap: 14px; width: 320px; }
+  #login-box label { font-size: 12px; color: var(--text2); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  #login-box input { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 8px; font-size: 15px; outline: none; width: 100%; }
+  #login-box input:focus { border-color: var(--accent); }
+  #btn-login { background: var(--accent); color: white; border: none; padding: 11px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; }
+  #btn-login:hover { opacity: 0.85; }
+  #login-error { color: var(--red); font-size: 13px; text-align: center; display: none; }
+
+  /* ---- ADMIN PANEL ---- */
+  #admin-panel { display: none; width: 100%; max-width: 1100px; padding: 32px 24px; }
+  header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; width: 100%; position: sticky; top: 0; z-index: 50; }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, #3b82f6, #10b981); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .logo h1 { font-size: 16px; font-weight: 700; }
+  .badge-admin { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+
+  .panel-title { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+  .panel-sub { font-size: 13px; color: var(--text2); margin-bottom: 28px; }
+
+  #status-msg { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 20px; display: none; }
+  #status-msg.info { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); color: #93c5fd; }
+  #status-msg.ok { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
+  #status-msg.err { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+
+  #btn-generar { background: linear-gradient(135deg, #1d4ed8, #3b82f6); color: white; border: none; padding: 12px 28px; border-radius: 9px; font-size: 14px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 32px; }
+  #btn-generar:hover { opacity: 0.88; }
+  #btn-generar:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ---- GRID DE TARJETAS ---- */
+  .cards-grid { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; }
+  .card-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .card-wrap canvas { border-radius: 16px; box-shadow: 0 8px 48px rgba(0,0,0,0.7); }
+  .card-wrap .match-label { font-size: 12px; color: var(--text2); font-weight: 600; }
+  .btn-dl { background: var(--green); color: white; border: none; padding: 9px 20px; border-radius: 7px; cursor: pointer; font-size: 13px; font-weight: 700; }
+  .btn-dl:hover { opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <h2>Bet_<span>Data_</span>Science</h2>
+  <div id="login-box">
+    <label for="pwd">Contraseña de acceso</label>
+    <input type="password" id="pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()" />
+    <button id="btn-login" onclick="doLogin()">Entrar</button>
+    <p id="login-error">Contraseña incorrecta.</p>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<header style="display:none;" id="admin-header">
+  <div class="logo">
+    <div class="logo-icon">⚽</div>
+    <h1>Bet_<span style="color:var(--accent)">Data_</span>Science</h1>
+  </div>
+  <span class="badge-admin">⚙ Panel Privado</span>
+</header>
+
+<div id="admin-panel">
+  <div class="panel-title">📲 Generador de Tarjetas Telegram</div>
+  <div class="panel-sub">Se cargan automáticamente los partidos <strong>pendientes</strong> del CSV. Genera y descarga cada PNG.</div>
+
+  <div id="status-msg"></div>
+  <button id="btn-generar" onclick="generarTarjetas()">⚡ Generar tarjetas</button>
+
+  <div class="cards-grid" id="cards-grid"></div>
+</div>
+
+<script>
+// ============================================================
+// CONFIGURACIÓN
+// ============================================================
+
+// ⚠️ CAMBIA ESTO: pon tu contraseña aquí
+const PASSWORD = 'BDS2026';
+
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSlifIeovPtcFbFQfHA_tFamKQQGlsMtoj7mTD1wNs38UAqgLl24tJh9mI3K7Uop5XxqYP22OcvpZsX/pub?output=csv';
+
+// ============================================================
+// LOGIN
+// ============================================================
+function doLogin() {
+  const val = document.getElementById('pwd').value;
+  if (val === PASSWORD) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-header').style.display = 'flex';
+    document.getElementById('admin-panel').style.display = 'block';
+    loadAndGenerate();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('pwd').value = '';
+    document.getElementById('pwd').focus();
+  }
+}
+
+// ============================================================
+// CARGA CSV
+// ============================================================
+function setStatus(msg, type) {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg; el.className = type; el.style.display = 'block';
+}
+
+async function loadAndGenerate() {
+  setStatus('⏳ Cargando datos del CSV…', 'info');
+  try {
+    const resp = await fetch(CSV_URL + '&_t=' + Date.now());
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const text = await resp.text();
+    const rows = parseCSV(text);
+    const pendientes = rows
+      .map(r => {
+        const aciertoRaw = (r['acierto'] || '').toLowerCase();
+        const resultado = r['resultado'] || '';
+        let estado = 'pendiente';
+        if (aciertoRaw === 'true' || aciertoRaw === 'si') estado = 'si';
+        else if (resultado.trim() && resultado.trim() !== '—') estado = 'no';
+        return {
+          fecha: r['fecha'] || '',
+          liga: r['liga'] || 'Liga',
+          local: r['local'] || 'Local',
+          visitante: r['visitante'] || 'Visitante',
+          prono: r['recomendacion'] || '—',
+          conf: r['%'] || '0%',
+          mercado: r['mercado'] || 'Mercado Ganador',
+          acierto: estado
+        };
+      })
+      .filter(d => d.acierto === 'pendiente');
+
+    if (!pendientes.length) {
+      setStatus('No hay partidos pendientes en el CSV.', 'err'); return;
+    }
+    setStatus(`✅ ${pendientes.length} partido(s) pendiente(s) cargado(s). Pulsa "Generar tarjetas".`, 'ok');
+    window._pendientes = pendientes;
+  } catch(e) {
+    setStatus('Error cargando CSV: ' + e.message, 'err');
+  }
+}
+
+function generarTarjetas() {
+  const data = window._pendientes;
+  if (!data || !data.length) { setStatus('Primero carga los datos.', 'err'); return; }
+  const btn = document.getElementById('btn-generar');
+  btn.disabled = true; btn.textContent = '⏳ Generando…';
+  const grid = document.getElementById('cards-grid');
+  grid.innerHTML = '';
+
+  data.forEach((d, i) => {
+    const canvas = drawCard(d);
+    const slug = `${d.local.replace(/\s+/g,'_')}_vs_${d.visitante.replace(/\s+/g,'_')}`;
+    const wrap = document.createElement('div');
+    wrap.className = 'card-wrap';
+
+    // Previsualización reducida
+    const preview = document.createElement('canvas');
+    preview.width = 400; preview.height = 480;
+    const pctx = preview.getContext('2d');
+    pctx.drawImage(canvas, 0, 0, 400, 480);
+    preview.style.borderRadius = '14px';
+
+    const label = document.createElement('div');
+    label.className = 'match-label';
+    label.textContent = `${d.local} vs ${d.visitante}`;
+
+    const btn2 = document.createElement('button');
+    btn2.className = 'btn-dl';
+    btn2.textContent = '⬇ Descargar PNG';
+    btn2.onclick = () => {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = `BDS_${slug}.png`;
+      a.click();
+    };
+
+    wrap.appendChild(preview);
+    wrap.appendChild(label);
+    wrap.appendChild(btn2);
+    grid.appendChild(wrap);
+  });
+
+  btn.disabled = false; btn.textContent = '⚡ Generar tarjetas';
+  setStatus(`✅ ${data.length} tarjeta(s) generada(s). Descárgalas abajo.`, 'ok');
+}
+
+// ============================================================
+// DIBUJO DE TARJETA CON CANVAS API
+// Canvas: 800 x 960 px  (proporción vertical tipo post)
+// ============================================================
+function drawCard(d) {
+  const W = 800, H = 960;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // ---- FONDO degradado ----
+  const bgGrad = ctx.createLinearGradient(0, 0, W * 0.3, H);
+  bgGrad.addColorStop(0,   '#0d2050');
+  bgGrad.addColorStop(0.5, '#0a1628');
+  bgGrad.addColorStop(1,   '#071020');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Overlay brillante esquina superior derecha
+  const glow = ctx.createRadialGradient(W * 0.85, H * 0.1, 0, W * 0.85, H * 0.1, 380);
+  glow.addColorStop(0, 'rgba(37,99,235,0.22)');
+  glow.addColorStop(1, 'rgba(37,99,235,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, W, H);
+
+  // ---- BRAND ----
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'white';
+  ctx.font = '900 34px "Segoe UI", system-ui, sans-serif';
+  ctx.letterSpacing = '4px';
+  // Dibujamos en dos colores
+  const brandY = 80;
+  ctx.fillStyle = 'white';
+  ctx.fillText('BET_', W / 2 - 58, brandY);
+  ctx.fillStyle = '#60a5fa';
+  ctx.fillText('DATA_', W / 2 + 10, brandY);
+  ctx.fillStyle = 'white';
+  // Medimos para posicionar SCIENCE
+  const b1 = ctx.measureText('BET_').width;
+  const b2 = ctx.measureText('DATA_').width;
+  ctx.fillText('BET_DATA_SCIENCE', W / 2, brandY); // todo junto de una vez
+  // Rehacemos con colores correctos
+  ctx.clearRect(0, 40, W, 60); // borramos la línea
+  drawBrand(ctx, W / 2, brandY);
+
+  // ---- BADGE LIGA ----
+  const ligaY = 130;
+  const ligaText = (d.liga || 'LIGA').toUpperCase();
+  drawPill(ctx, W / 2, ligaY, ligaText, '#1d4ed8', '#2563eb', 'white', 15, 38, 260);
+
+  // ---- ROW EQUIPOS ----
+  const rowY = 230;
+  // Equipo local (izquierda)
+  drawTeamBox(ctx, 40, rowY, 320, 110, d.local || 'LOCAL');
+  // VS
+  drawVsBadge(ctx, W / 2, rowY + 55);
+  // Equipo visitante (derecha)
+  drawTeamBox(ctx, W - 360, rowY, 320, 110, d.visitante || 'VISITANTE', true);
+
+  // ---- INFO BOXES (Mercado / Recomendación / Probabilidad) ----
+  const boxY = 380;
+  const boxW = 226, boxH = 120, boxGap = 14;
+  const totalBoxW = 3 * boxW + 2 * boxGap;
+  const boxStartX = (W - totalBoxW) / 2;
+
+  // Mercado
+  drawInfoBox(ctx, boxStartX,           boxY, boxW, boxH, 'MERCADO',        d.mercado || 'Mercado Ganador', 'white',   14);
+  // Recomendación
+  drawInfoBox(ctx, boxStartX + boxW + boxGap, boxY, boxW, boxH, 'RECOMENDACIÓN', d.prono || '—',               '#60a5fa', 26);
+  // Probabilidad
+  drawInfoBox(ctx, boxStartX + (boxW + boxGap) * 2, boxY, boxW, boxH, 'PROBABILIDAD', d.conf || '—',           '#34d399', 26);
+
+  // ---- FECHA ----
+  if (d.fecha) {
+    const fechaDisplay = formatFecha(d.fecha);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#64748b';
+    ctx.font = '600 16px "Segoe UI", system-ui, sans-serif';
+    ctx.fillText('📅  ' + fechaDisplay, W / 2, 540);
+  }
+
+  // ---- LÍNEA DIVISORIA FOOTER ----
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(52, H - 80); ctx.lineTo(W - 52, H - 80); ctx.stroke();
+
+  // ---- FOOTER ----
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#475569';
+  ctx.font = '700 13px "Segoe UI", system-ui, sans-serif';
+  ctx.letterSpacing = '2px';
+  ctx.fillText('@BET_DATA_SCIENCE', W / 2, H - 44);
+
+  return canvas;
+}
+
+// ---- helpers de dibujo ----
+
+function drawBrand(ctx, cx, y) {
+  ctx.textAlign = 'center';
+  ctx.font = '900 36px "Segoe UI", system-ui, sans-serif';
+  const full = 'BET_DATA_SCIENCE';
+  const wFull = ctx.measureText(full).width;
+  const startX = cx - wFull / 2;
+
+  const parts = [
+    { text: 'BET_',    color: 'white' },
+    { text: 'DATA_',   color: '#60a5fa' },
+    { text: 'SCIENCE', color: 'white' }
+  ];
+  let x = startX;
+  ctx.textAlign = 'left';
+  parts.forEach(p => {
+    ctx.fillStyle = p.color;
+    ctx.fillText(p.text, x, y);
+    x += ctx.measureText(p.text).width;
+  });
+  ctx.textAlign = 'center';
+}
+
+function drawPill(ctx, cx, cy, text, colorA, colorB, textColor, fontSize, height, minWidth) {
+  ctx.font = `800 ${fontSize}px "Segoe UI", system-ui, sans-serif`;
+  const tw = ctx.measureText(text).width;
+  const pw = Math.max(minWidth, tw + 60);
+  const ph = height;
+  const px = cx - pw / 2, py = cy - ph / 2;
+  const r = ph / 2;
+
+  const grad = ctx.createLinearGradient(px, py, px + pw, py);
+  grad.addColorStop(0, colorA); grad.addColorStop(1, colorB);
+  ctx.fillStyle = grad;
+  roundRect(ctx, px, py, pw, ph, r); ctx.fill();
+
+  ctx.fillStyle = textColor;
+  ctx.textAlign = 'center';
+  ctx.fillText(text, cx, cy + fontSize * 0.36);
+}
+
+function drawTeamBox(ctx, x, y, w, h, name, reverse = false) {
+  // Caja blanca redondeada
+  ctx.fillStyle = 'white';
+  roundRect(ctx, x, y, w, h, 14); ctx.fill();
+
+  // Círculo inicial (placeholder escudo)
+  const circR = 28;
+  const circX = reverse ? x + w - 20 - circR : x + 20 + circR;
+  const circY = y + h / 2;
+  const circGrad = ctx.createRadialGradient(circX, circY, 0, circX, circY, circR);
+  circGrad.addColorStop(0, '#dbeafe'); circGrad.addColorStop(1, '#bfdbfe');
+  ctx.fillStyle = circGrad; ctx.beginPath(); ctx.arc(circX, circY, circR, 0, Math.PI * 2); ctx.fill();
+
+  // Iniciales en el círculo
+  const initials = name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+  ctx.fillStyle = '#1e40af'; ctx.font = '900 18px "Segoe UI", system-ui, sans-serif';
+  ctx.textAlign = 'center'; ctx.fillText(initials, circX, circY + 7);
+
+  // Nombre del equipo
+  ctx.fillStyle = '#0f172a'; ctx.font = '900 15px "Segoe UI", system-ui, sans-serif';
+  const maxW = w - circR * 2 - 50;
+  const nameText = name.toUpperCase();
+  ctx.textAlign = reverse ? 'right' : 'left';
+  const nameX = reverse ? x + w - circR * 2 - 30 : x + circR * 2 + 30;
+  // Ajustar fuente si es muy largo
+  let fs = 15;
+  while (ctx.measureText(nameText).width > maxW && fs > 9) {
+    fs--; ctx.font = `900 ${fs}px "Segoe UI", system-ui, sans-serif`;
+  }
+  ctx.fillText(nameText, nameX, y + h / 2 + 6);
+  ctx.textAlign = 'center';
+}
+
+function drawVsBadge(ctx, cx, cy) {
+  const r = 26;
+  ctx.fillStyle = '#1e3a6e'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = 'white'; ctx.font = '900 15px "Segoe UI", system-ui, sans-serif';
+  ctx.textAlign = 'center'; ctx.fillText('VS', cx, cy + 5);
+}
+
+function drawInfoBox(ctx, x, y, w, h, label, value, valueColor, valueFontSize) {
+  // Fondo semitransparente
+  ctx.fillStyle = 'rgba(255,255,255,0.05)';
+  roundRect(ctx, x, y, w, h, 14); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
+  roundRect(ctx, x, y, w, h, 14); ctx.stroke();
+
+  // Label
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#94a3b8'; ctx.font = '700 11px "Segoe UI", system-ui, sans-serif';
+  ctx.fillText(label, x + w / 2, y + 26);
+
+  // Valor
+  ctx.fillStyle = valueColor; ctx.font = `900 ${valueFontSize}px "Segoe UI", system-ui, sans-serif`;
+  // Si el valor es largo, reducir fuente
+  let fs = valueFontSize;
+  while (ctx.measureText(value).width > w - 20 && fs > 11) {
+    fs--; ctx.font = `900 ${fs}px "Segoe UI", system-ui, sans-serif`;
+  }
+  ctx.fillText(value, x + w / 2, y + h / 2 + fs * 0.38 + 8);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function formatFecha(str) {
+  if (!str) return '';
+  const p = str.split('/');
+  if (p.length < 3) return str;
+  const dias = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const d = new Date(p[2], p[1]-1, p[0]);
+  return `${dias[d.getDay()]} ${p[0]} de ${meses[d.getMonth()]} de ${p[2]}`;
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.replace(/"/g,'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''));
+  return lines.slice(1).map(line => {
+    const values = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = (values[i] || '').replace(/"/g,'').trim());
+    return obj;
+  });
+}
+</script>
+</body>
+</html>
