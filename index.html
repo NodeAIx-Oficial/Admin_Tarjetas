@@ -395,7 +395,7 @@ function drawVsBadge(ctx, cx, cy, r) {
   ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
   ctx.strokeStyle = 'rgba(100,150,255,0.3)'; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.stroke();
-  ctx.fillStyle = 'white'; ctx.font = `900 26px "Segoe UI", system-ui, sans-serif`;
+  ctx.fillStyle = 'white'; ctx.font = `900 22px "Segoe UI", system-ui, sans-serif`;
   ctx.textAlign = 'center'; ctx.fillText('VS', cx, cy + 9);
 }
 
@@ -408,7 +408,7 @@ function drawInfoBox(ctx, x, y, w, h, label, value, valueColor, valueFontSize) {
 
   // Label
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#94a3b8'; ctx.font = '700 20px "Segoe UI", system-ui, sans-serif';
+  ctx.fillStyle = '#94a3b8'; ctx.font = '700 22px "Segoe UI", system-ui, sans-serif';
   ctx.fillText(label, x + w/2, y + 46);
 
   // Valor — ajustar tamaño si no cabe
