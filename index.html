@@ -177,11 +177,11 @@ function generarTarjetas() {
     const wrap = document.createElement('div');
     wrap.className = 'card-wrap';
 
-    // Previsualización reducida
+    // Previsualización reducida (1080x1920 → 270x480)
     const preview = document.createElement('canvas');
-    preview.width = 400; preview.height = 480;
+    preview.width = 270; preview.height = 480;
     const pctx = preview.getContext('2d');
-    pctx.drawImage(canvas, 0, 0, 400, 480);
+    pctx.drawImage(canvas, 0, 0, 270, 480);
     preview.style.borderRadius = '14px';
 
     const label = document.createElement('div');
@@ -209,8 +209,7 @@ function generarTarjetas() {
 }
 
 // ============================================================
-// DIBUJO DE TARJETA CON CANVAS API
-// Canvas: 800 x 960 px  (proporción vertical tipo post)
+// DIBUJO DE TARJETA CON CANVAS API — 1080 × 1920 px
 // ============================================================
 function drawCard(d) {
   const W = 1080, H = 1920;
@@ -218,107 +217,121 @@ function drawCard(d) {
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
 
-  // ---- FONDO degradado ----
-  const bgGrad = ctx.createLinearGradient(0, 0, W * 0.3, H);
-  bgGrad.addColorStop(0,   '#0d2050');
-  bgGrad.addColorStop(0.5, '#0a1628');
-  bgGrad.addColorStop(1,   '#071020');
-  ctx.fillStyle = bgGrad;
+  // ── FONDO base azul oscuro igual al ejemplo ──────────────
+  ctx.fillStyle = '#0d1f4e';
   ctx.fillRect(0, 0, W, H);
 
-  // Overlay brillante esquina superior derecha
-  const glow = ctx.createRadialGradient(W * 0.85, H * 0.1, 0, W * 0.85, H * 0.1, 380);
-  glow.addColorStop(0, 'rgba(37,99,235,0.22)');
-  glow.addColorStop(1, 'rgba(37,99,235,0)');
-  ctx.fillStyle = glow;
+  // Degradado radial central ligeramente más claro
+  const gCenter = ctx.createRadialGradient(W/2, H*0.42, 0, W/2, H*0.42, 780);
+  gCenter.addColorStop(0,   'rgba(22,58,130,0.70)');
+  gCenter.addColorStop(0.6, 'rgba(13,31,78,0.40)');
+  gCenter.addColorStop(1,   'rgba(5,10,30,0)');
+  ctx.fillStyle = gCenter;
   ctx.fillRect(0, 0, W, H);
 
-  // ---- BRAND ----
-  ctx.textAlign = 'center';
-  ctx.fillStyle = 'white';
-  ctx.font = '900 34px "Segoe UI", system-ui, sans-serif';
-  ctx.letterSpacing = '4px';
-  // Dibujamos en dos colores
-  const brandY = 80;
-  ctx.fillStyle = 'white';
-  ctx.fillText('BET_', W / 2 - 58, brandY);
-  ctx.fillStyle = '#60a5fa';
-  ctx.fillText('DATA_', W / 2 + 10, brandY);
-  ctx.fillStyle = 'white';
-  // Medimos para posicionar SCIENCE
-  const b1 = ctx.measureText('BET_').width;
-  const b2 = ctx.measureText('DATA_').width;
-  ctx.fillText('BET_DATA_SCIENCE', W / 2, brandY); // todo junto de una vez
-  // Rehacemos con colores correctos
-  ctx.clearRect(0, 40, W, 60); // borramos la línea
-  drawBrand(ctx, W / 2, brandY);
+  // Brillo sutil esquina superior derecha
+  const gTR = ctx.createRadialGradient(W*0.9, 0, 0, W*0.9, 0, 500);
+  gTR.addColorStop(0, 'rgba(56,120,255,0.18)');
+  gTR.addColorStop(1, 'rgba(56,120,255,0)');
+  ctx.fillStyle = gTR;
+  ctx.fillRect(0, 0, W, H);
 
-  // ---- BADGE LIGA ----
-  const ligaY = 130;
-  const ligaText = (d.liga || 'LIGA').toUpperCase();
-  drawPill(ctx, W / 2, ligaY, ligaText, '#1d4ed8', '#2563eb', 'white', 15, 38, 260);
+  // ── MARCA BET_DATA_SCIENCE ───────────────────────────────
+  drawBrand(ctx, W/2, 260, 88);
 
-  // ---- ROW EQUIPOS ----
-  const rowY = 230;
-  // Equipo local (izquierda)
-  drawTeamBox(ctx, 40, rowY, 320, 110, d.local || 'LOCAL');
-  // VS
-  drawVsBadge(ctx, W / 2, rowY + 55);
-  // Equipo visitante (derecha)
-  drawTeamBox(ctx, W - 360, rowY, 320, 110, d.visitante || 'VISITANTE', true);
+  // ── BADGE LIGA ───────────────────────────────────────────
+  drawPill(ctx, W/2, 400, (d.liga || 'LIGA').toUpperCase(),
+           '#1a50c8', '#2563eb', 'white', 34, 80, 420);
 
-  // ---- INFO BOXES (Mercado / Recomendación / Probabilidad) ----
-  const boxY = 380;
-  const boxW = 226, boxH = 120, boxGap = 14;
-  const totalBoxW = 3 * boxW + 2 * boxGap;
-  const boxStartX = (W - totalBoxW) / 2;
+  // ── BLOQUE CENTRAL BLANCO (contenedor equipos + info) ───
+  const blockX = 60, blockW = W - 120;
+  const blockY = 520, blockH = 820;
+  const blockR  = 32;
 
-  // Mercado
-  drawInfoBox(ctx, boxStartX,           boxY, boxW, boxH, 'MERCADO',        d.mercado || 'Mercado Ganador', 'white',   14);
-  // Recomendación
-  drawInfoBox(ctx, boxStartX + boxW + boxGap, boxY, boxW, boxH, 'RECOMENDACIÓN', d.prono || '—',               '#60a5fa', 26);
-  // Probabilidad
-  drawInfoBox(ctx, boxStartX + (boxW + boxGap) * 2, boxY, boxW, boxH, 'PROBABILIDAD', d.conf || '—',           '#34d399', 26);
+  // Sombra del bloque
+  ctx.shadowColor = 'rgba(0,0,0,0.55)';
+  ctx.shadowBlur  = 60;
+  ctx.shadowOffsetY = 12;
+  ctx.fillStyle = '#0d2260';
+  roundRect(ctx, blockX, blockY, blockW, blockH, blockR); ctx.fill();
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
 
-  // ---- FECHA ----
+  // Borde sutil del bloque
+  ctx.strokeStyle = 'rgba(80,130,255,0.25)'; ctx.lineWidth = 2;
+  roundRect(ctx, blockX, blockY, blockW, blockH, blockR); ctx.stroke();
+
+  // ── ROW EQUIPOS ─────────────────────────────────────────
+  const teamY    = blockY + 60;
+  const teamH    = 190;
+  const teamW    = 430;
+  const teamGap  = 60;   // espacio para VS en el centro
+  const teamLX   = blockX + 40;
+  const teamRX   = blockX + blockW - 40 - teamW;
+
+  drawTeamBox(ctx, teamLX, teamY, teamW, teamH, d.local     || 'LOCAL',     false);
+  drawTeamBox(ctx, teamRX, teamY, teamW, teamH, d.visitante || 'VISITANTE', true);
+  drawVsBadge(ctx, W/2, teamY + teamH/2, 56);
+
+  // ── SEPARADOR ────────────────────────────────────────────
+  const sepY = teamY + teamH + 50;
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(blockX+60, sepY); ctx.lineTo(blockX+blockW-60, sepY); ctx.stroke();
+
+  // ── TRES CAJAS INFO ──────────────────────────────────────
+  const infoY   = sepY + 40;
+  const infoH   = 220;
+  const infoGap = 24;
+  const infoW   = (blockW - 80 - infoGap*2) / 3;
+  const infoX0  = blockX + 40;
+
+  drawInfoBox(ctx, infoX0,                  infoY, infoW, infoH,
+              'MERCADO',        d.mercado || 'Mercado Ganador', 'white',   30);
+  drawInfoBox(ctx, infoX0 + infoW + infoGap,  infoY, infoW, infoH,
+              'RECOMENDACIÓN',  d.prono   || '—',               '#60a5fa', 64);
+  drawInfoBox(ctx, infoX0 + (infoW+infoGap)*2, infoY, infoW, infoH,
+              'PROBABILIDAD',   d.conf    || '—',               '#34d399', 64);
+
+  // ── FECHA ────────────────────────────────────────────────
+  const fechaY = infoY + infoH + 60;
   if (d.fecha) {
-    const fechaDisplay = formatFecha(d.fecha);
+    // Icono calendario (simple rectángulo)
+    const iconSize = 36;
+    const iconX = W/2 - ctx.measureText(formatFecha(d.fecha)).width/2 - iconSize - 14;
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    roundRect(ctx, iconX, fechaY - iconSize*0.8, iconSize, iconSize, 6); ctx.fill();
+    ctx.fillStyle = 'white'; ctx.font = '700 20px "Segoe UI", system-ui, sans-serif';
+    ctx.textAlign = 'center'; ctx.fillText('📅', iconX + iconSize/2, fechaY - iconSize*0.8 + 26);
+
+    ctx.fillStyle = 'rgba(180,200,255,0.75)';
+    ctx.font = '600 34px "Segoe UI", system-ui, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#64748b';
-    ctx.font = '600 16px "Segoe UI", system-ui, sans-serif';
-    ctx.fillText('📅  ' + fechaDisplay, W / 2, 540);
+    ctx.fillText(formatFecha(d.fecha), W/2 + 14, fechaY);
   }
 
-  // ---- LÍNEA DIVISORIA FOOTER ----
-  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(52, H - 80); ctx.lineTo(W - 52, H - 80); ctx.stroke();
+  // ── FOOTER ───────────────────────────────────────────────
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(80, H-160); ctx.lineTo(W-80, H-160); ctx.stroke();
 
-  // ---- FOOTER ----
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#475569';
-  ctx.font = '700 13px "Segoe UI", system-ui, sans-serif';
-  ctx.letterSpacing = '2px';
-  ctx.fillText('@BET_DATA_SCIENCE', W / 2, H - 44);
+  ctx.fillStyle = 'rgba(150,170,220,0.50)';
+  ctx.font = '700 30px "Segoe UI", system-ui, sans-serif';
+  ctx.fillText('@BET_DATA_SCIENCE', W/2, H-100);
 
   return canvas;
 }
 
-// ---- helpers de dibujo ----
+// ── HELPERS ──────────────────────────────────────────────────
 
-function drawBrand(ctx, cx, y) {
-  ctx.textAlign = 'center';
-  ctx.font = '900 36px "Segoe UI", system-ui, sans-serif';
-  const full = 'BET_DATA_SCIENCE';
-  const wFull = ctx.measureText(full).width;
-  const startX = cx - wFull / 2;
-
+function drawBrand(ctx, cx, y, fontSize) {
+  ctx.font = `900 ${fontSize}px "Segoe UI", system-ui, sans-serif`;
   const parts = [
     { text: 'BET_',    color: 'white' },
     { text: 'DATA_',   color: '#60a5fa' },
     { text: 'SCIENCE', color: 'white' }
   ];
-  let x = startX;
+  const full = parts.map(p => p.text).join('');
+  const totalW = ctx.measureText(full).width;
+  let x = cx - totalW / 2;
   ctx.textAlign = 'left';
   parts.forEach(p => {
     ctx.fillStyle = p.color;
@@ -330,91 +343,102 @@ function drawBrand(ctx, cx, y) {
 
 function drawPill(ctx, cx, cy, text, colorA, colorB, textColor, fontSize, height, minWidth) {
   ctx.font = `800 ${fontSize}px "Segoe UI", system-ui, sans-serif`;
-  const tw = ctx.measureText(text).width;
-  const pw = Math.max(minWidth, tw + 60);
-  const ph = height;
-  const px = cx - pw / 2, py = cy - ph / 2;
-  const r = ph / 2;
-
-  const grad = ctx.createLinearGradient(px, py, px + pw, py);
+  const tw  = ctx.measureText(text).width;
+  const pw  = Math.max(minWidth, tw + 80);
+  const ph  = height;
+  const px  = cx - pw/2, py = cy - ph/2;
+  const r   = ph/2;
+  const grad = ctx.createLinearGradient(px, py, px+pw, py);
   grad.addColorStop(0, colorA); grad.addColorStop(1, colorB);
   ctx.fillStyle = grad;
   roundRect(ctx, px, py, pw, ph, r); ctx.fill();
-
-  ctx.fillStyle = textColor;
-  ctx.textAlign = 'center';
-  ctx.fillText(text, cx, cy + fontSize * 0.36);
+  ctx.fillStyle = textColor; ctx.textAlign = 'center';
+  ctx.fillText(text, cx, cy + fontSize*0.36);
 }
 
-function drawTeamBox(ctx, x, y, w, h, name, reverse = false) {
-  // Caja blanca redondeada
+function drawTeamBox(ctx, x, y, w, h, name, reverse) {
+  // Caja blanca
   ctx.fillStyle = 'white';
-  roundRect(ctx, x, y, w, h, 14); ctx.fill();
+  roundRect(ctx, x, y, w, h, 20); ctx.fill();
 
-  // Círculo inicial (placeholder escudo)
-  const circR = 28;
-  const circX = reverse ? x + w - 20 - circR : x + 20 + circR;
-  const circY = y + h / 2;
-  const circGrad = ctx.createRadialGradient(circX, circY, 0, circX, circY, circR);
-  circGrad.addColorStop(0, '#dbeafe'); circGrad.addColorStop(1, '#bfdbfe');
-  ctx.fillStyle = circGrad; ctx.beginPath(); ctx.arc(circX, circY, circR, 0, Math.PI * 2); ctx.fill();
+  // Círculo escudo placeholder
+  const circR = 44;
+  const circX = reverse ? x + w - 28 - circR : x + 28 + circR;
+  const circY = y + h/2;
+  const cg = ctx.createRadialGradient(circX, circY, 0, circX, circY, circR);
+  cg.addColorStop(0, '#dbeafe'); cg.addColorStop(1, '#bfdbfe');
+  ctx.fillStyle = cg;
+  ctx.beginPath(); ctx.arc(circX, circY, circR, 0, Math.PI*2); ctx.fill();
 
-  // Iniciales en el círculo
-  const initials = name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
-  ctx.fillStyle = '#1e40af'; ctx.font = '900 18px "Segoe UI", system-ui, sans-serif';
-  ctx.textAlign = 'center'; ctx.fillText(initials, circX, circY + 7);
+  // Iniciales
+  const initials = name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+  ctx.fillStyle = '#1e40af'; ctx.font = '900 26px "Segoe UI", system-ui, sans-serif';
+  ctx.textAlign = 'center'; ctx.fillText(initials, circX, circY + 9);
 
-  // Nombre del equipo
-  ctx.fillStyle = '#0f172a'; ctx.font = '900 15px "Segoe UI", system-ui, sans-serif';
-  const maxW = w - circR * 2 - 50;
-  const nameText = name.toUpperCase();
+  // Nombre equipo
+  const maxW  = w - circR*2 - 80;
+  const nameT = name.toUpperCase();
   ctx.textAlign = reverse ? 'right' : 'left';
-  const nameX = reverse ? x + w - circR * 2 - 30 : x + circR * 2 + 30;
-  // Ajustar fuente si es muy largo
-  let fs = 15;
-  while (ctx.measureText(nameText).width > maxW && fs > 9) {
+  const nameX = reverse ? x + w - circR*2 - 44 : x + circR*2 + 44;
+  let fs = 26;
+  ctx.font = `900 ${fs}px "Segoe UI", system-ui, sans-serif`;
+  while (ctx.measureText(nameT).width > maxW && fs > 14) {
     fs--; ctx.font = `900 ${fs}px "Segoe UI", system-ui, sans-serif`;
   }
-  ctx.fillText(nameText, nameX, y + h / 2 + 6);
+  ctx.fillStyle = '#0f172a';
+  ctx.fillText(nameT, nameX, y + h/2 + 9);
   ctx.textAlign = 'center';
 }
 
-function drawVsBadge(ctx, cx, cy) {
-  const r = 26;
-  ctx.fillStyle = '#1e3a6e'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = 'white'; ctx.font = '900 15px "Segoe UI", system-ui, sans-serif';
-  ctx.textAlign = 'center'; ctx.fillText('VS', cx, cy + 5);
+function drawVsBadge(ctx, cx, cy, r) {
+  ctx.fillStyle = '#1a3a80';
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle = 'rgba(100,150,255,0.3)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.stroke();
+  ctx.fillStyle = 'white'; ctx.font = `900 26px "Segoe UI", system-ui, sans-serif`;
+  ctx.textAlign = 'center'; ctx.fillText('VS', cx, cy + 9);
 }
 
 function drawInfoBox(ctx, x, y, w, h, label, value, valueColor, valueFontSize) {
-  // Fondo semitransparente
-  ctx.fillStyle = 'rgba(255,255,255,0.05)';
-  roundRect(ctx, x, y, w, h, 14); ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
-  roundRect(ctx, x, y, w, h, 14); ctx.stroke();
+  // Fondo
+  ctx.fillStyle = 'rgba(255,255,255,0.04)';
+  roundRect(ctx, x, y, w, h, 20); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.10)'; ctx.lineWidth = 1.5;
+  roundRect(ctx, x, y, w, h, 20); ctx.stroke();
 
   // Label
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#94a3b8'; ctx.font = '700 11px "Segoe UI", system-ui, sans-serif';
-  ctx.fillText(label, x + w / 2, y + 26);
+  ctx.fillStyle = '#94a3b8'; ctx.font = '700 22px "Segoe UI", system-ui, sans-serif';
+  ctx.fillText(label, x + w/2, y + 46);
 
-  // Valor
-  ctx.fillStyle = valueColor; ctx.font = `900 ${valueFontSize}px "Segoe UI", system-ui, sans-serif`;
-  // Si el valor es largo, reducir fuente
+  // Valor — ajustar tamaño si no cabe
   let fs = valueFontSize;
-  while (ctx.measureText(value).width > w - 20 && fs > 11) {
-    fs--; ctx.font = `900 ${fs}px "Segoe UI", system-ui, sans-serif`;
+  ctx.font = `900 ${fs}px "Segoe UI", system-ui, sans-serif`;
+  while (ctx.measureText(value).width > w - 24 && fs > 18) {
+    fs -= 2; ctx.font = `900 ${fs}px "Segoe UI", system-ui, sans-serif`;
   }
-  ctx.fillText(value, x + w / 2, y + h / 2 + fs * 0.38 + 8);
+  // Texto largo del mercado → dividir en dos líneas
+  if (label === 'MERCADO' && ctx.measureText(value).width > w - 24) {
+    const words = value.split(' ');
+    const mid = Math.ceil(words.length/2);
+    const l1 = words.slice(0, mid).join(' ');
+    const l2 = words.slice(mid).join(' ');
+    ctx.fillStyle = valueColor;
+    ctx.fillText(l1, x + w/2, y + h/2 + 4);
+    ctx.fillText(l2, x + w/2, y + h/2 + fs + 8);
+  } else {
+    ctx.fillStyle = valueColor;
+    ctx.fillText(value, x + w/2, y + h/2 + fs*0.38 + 10);
+  }
 }
 
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y,   x+w, y+r);
+  ctx.lineTo(x+w,   y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r,   y+h); ctx.quadraticCurveTo(x,   y+h, x,   y+h-r);
+  ctx.lineTo(x,     y+r); ctx.quadraticCurveTo(x,   y,   x+r, y);
   ctx.closePath();
 }
 
