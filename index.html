@@ -295,17 +295,17 @@ function drawCard(d) {
   const fechaY = infoY + infoH + 60;
   if (d.fecha) {
     // Icono calendario (simple rectángulo)
-   // const iconSize = 36;
-   // const iconX = W/2 - ctx.measureText(formatFecha(d.fecha)).width/2 - iconSize - 14;
-   // ctx.fillStyle = 'rgba(255,255,255,0.15)';
-   // roundRect(ctx, iconX, fechaY - iconSize*0.9, iconSize, iconSize, 6); ctx.fill();
-   // ctx.fillStyle = 'white'; ctx.font = '700 20px "Segoe UI", system-ui, sans-serif';
-   // ctx.textAlign = 'center'; ctx.fillText('📅', iconX + iconSize/2, fechaY - iconSize*0.9 + 26);
+    const iconSize = 36;
+    const iconX = W/2 - ctx.measureText(formatFecha(d.fecha)).width/2 - iconSize - 28;
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    roundRect(ctx, iconX, fechaY - iconSize*0.8, iconSize, iconSize, 6); ctx.fill();
+    ctx.fillStyle = 'white'; ctx.font = '700 20px "Segoe UI", system-ui, sans-serif';
+    ctx.textAlign = 'center'; ctx.fillText('📅', iconX + iconSize/2, fechaY - iconSize*0.8 + 26);
 
-   // ctx.fillStyle = 'rgba(180,200,255,0.75)';
-   // ctx.font = '600 34px "Segoe UI", system-ui, sans-serif';
-   // ctx.textAlign = 'center';
-   // ctx.fillText(formatFecha(d.fecha), W/2 + 14, fechaY);
+    ctx.fillStyle = 'rgba(180,200,255,0.75)';
+    ctx.font = '600 34px "Segoe UI", system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(formatFecha(d.fecha), W/2 + 14, fechaY);
   }
 
   // ── FOOTER ───────────────────────────────────────────────
@@ -325,8 +325,8 @@ function drawCard(d) {
 function drawBrand(ctx, cx, y, fontSize) {
   ctx.font = `400 ${fontSize}px "Segoe UI", system-ui, sans-serif`;
   const parts = [
-    { text: 'FUTBOL_',    color: 'white' },
-    { text: 'ALGORITMICO_',   color: '#60a5fa' },
+    { text: 'Futbol_',    color: 'white' },
+    { text: 'Algoritmico_',   color: '#60a5fa' },
     { text: 'IA', color: 'white' }
   ];
   const full = parts.map(p => p.text).join('');
