@@ -300,10 +300,10 @@ function drawCard(d) {
     ctx.fillStyle = 'rgba(255,255,255,0.15)';
     roundRect(ctx, iconX, fechaY - iconSize*0.8, iconSize, iconSize, 6); ctx.fill();
     ctx.fillStyle = 'white'; ctx.font = '700 20px "Segoe UI", system-ui, sans-serif';
-    ctx.textAlign = 'center'; ctx.fillText('📅', iconX + iconSize, fechaY - iconSize*0.8 + 26);
+    ctx.textAlign = 'center'; ctx.fillText('📅', iconX + iconSize/2, fechaY - iconSize*0.8 + 26);
 
     ctx.fillStyle = 'rgba(180,200,255,0.75)';
-    ctx.font = '600 34px "Segoe UI", system-ui, sans-serif';
+    ctx.font = '700 34px "Segoe UI", system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(formatFecha(d.fecha), W/2 + 14, fechaY);
   }
