@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>F_A_IA Admin – Tarjetas</title>
+<title>F_A Admin – Tarjetas</title>
 <style>
   :root {
     --bg: #0d0f14; --bg2: #13161e; --bg3: #1a1e29;
@@ -63,7 +63,7 @@
 
 <!-- LOGIN -->
 <div id="login-screen">
-  <h2>Futbol_<span>Algoritmico_</span>IA</h2>
+  <h2>Futbol_<span>Algoritmico</span></h2>
   <div id="login-box">
     <label for="pwd">Contraseña de acceso</label>
     <input type="password" id="pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter') doLogin()" />
@@ -76,7 +76,7 @@
 <header style="display:none;" id="admin-header">
   <div class="logo">
     <div class="logo-icon">⚽</div>
-    <h1>Futbol_<span style="color:var(--accent)">Algoritmico_</span>IA</h1>
+    <h1>Futbol_<span style="color:var(--accent)">Algoritmico</span></h1>
   </div>
   <span class="badge-admin">⚙ Panel Privado</span>
 </header>
@@ -194,7 +194,7 @@ function generarTarjetas() {
     btn2.onclick = () => {
       const a = document.createElement('a');
       a.href = canvas.toDataURL('image/png');
-      a.download = `BDS_${slug}.png`;
+      a.download = `F_A${slug}.png`;
       a.click();
     };
 
