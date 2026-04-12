@@ -195,7 +195,7 @@ function generarTarjetas() {
     btn2.onclick = () => {
       const a = document.createElement('a');
       a.href = canvas.toDataURL('image/png');
-      a.download = `F_A${slug}.png`;
+      a.download = `F_A_${slug}.png`;
       a.click();
     };
 
