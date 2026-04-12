@@ -420,8 +420,7 @@ function drawBrand(ctx, cx, y, fontSize) {
   ctx.font = `400 ${fontSize}px "Segoe UI", system-ui, sans-serif`;
   const parts = [
     { text: 'Futbol_',    color: 'white' },
-    { text: 'Algoritmico_',   color: '#60a5fa' },
-    { text: 'IA', color: 'white' }
+    { text: 'Algoritmico_',   color: 'white' }
   ];
   const full = parts.map(p => p.text).join('');
   const totalW = ctx.measureText(full).width;
