@@ -148,6 +148,7 @@ async function loadAndGenerate() {
           prono: r['recomendacion'] || '—',
           conf: r['%'] || '0%',
           mercado: r['mercado'] || 'Mercado Ganador',
+          guion: r['guion'] || '',
           acierto: estado
         };
       })
@@ -306,6 +307,64 @@ function drawCard(d) {
     ctx.font = '700 34px "Segoe UI", system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(formatFecha(d.fecha), W/2 + 14, fechaY);
+  }
+
+  // ── GUION (texto análisis del partido) ──────────────────
+  if (d.guion && d.guion.trim()) {
+    const gX = 80, gW = W - 160;
+    const gY = fechaY + 60;
+    const gH = H - 220 - gY;   // hasta justo encima del footer
+
+    // Fondo del recuadro
+    ctx.fillStyle = 'rgba(255,255,255,0.04)';
+    roundRect(ctx, gX, gY, gW, gH, 24); ctx.fill();
+    ctx.strokeStyle = 'rgba(80,130,255,0.20)'; ctx.lineWidth = 1.5;
+    roundRect(ctx, gX, gY, gW, gH, 24); ctx.stroke();
+
+    // Texto con auto-ajuste de fuente y word-wrap
+    const maxTextW = gW - 64;
+    const padding  = 40;
+    let fs = 38;
+    ctx.font = `500 ${fs}px "Segoe UI", system-ui, sans-serif`;
+
+    // Función que devuelve las líneas resultado de word-wrap
+    function wrapText(text, maxW) {
+      const words = text.split(' ');
+      const lines = [];
+      let current = '';
+      for (const w of words) {
+        const test = current ? current + ' ' + w : w;
+        if (ctx.measureText(test).width > maxW && current) {
+          lines.push(current);
+          current = w;
+        } else {
+          current = test;
+        }
+      }
+      if (current) lines.push(current);
+      return lines;
+    }
+
+    // Reducir fuente hasta que todo el texto quepa verticalmente
+    let lines = [];
+    const maxLines = Math.floor((gH - padding * 2) / (fs * 1.35));
+    while (fs > 22) {
+      ctx.font = `500 ${fs}px "Segoe UI", system-ui, sans-serif`;
+      lines = wrapText(d.guion.trim(), maxTextW);
+      const lineH = fs * 1.45;
+      if (lines.length * lineH <= gH - padding * 2) break;
+      fs -= 2;
+    }
+
+    const lineH  = fs * 1.45;
+    const totalH = lines.length * lineH;
+    const startY = gY + (gH - totalH) / 2 + fs * 0.9;
+
+    ctx.fillStyle = 'rgba(220,230,255,0.88)';
+    ctx.textAlign = 'center';
+    lines.forEach((line, idx) => {
+      ctx.fillText(line, gX + gW / 2, startY + idx * lineH);
+    });
   }
 
   // ── FOOTER ───────────────────────────────────────────────
