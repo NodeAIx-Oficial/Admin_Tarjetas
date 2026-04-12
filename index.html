@@ -238,15 +238,15 @@ function drawCard(d) {
   ctx.fillRect(0, 0, W, H);
 
   // ── MARCA BET_DATA_SCIENCE ───────────────────────────────
-  drawBrand(ctx, W/2, 260, 88);
+  drawBrand(ctx, W/2, 195, 88);
 
   // ── BADGE LIGA ───────────────────────────────────────────
-  drawPill(ctx, W/2, 400, (d.liga || 'LIGA').toUpperCase(),
+  drawPill(ctx, W/2, 320, (d.liga || 'LIGA').toUpperCase(),
            '#1a50c8', '#2563eb', 'white', 34, 80, 420);
 
   // ── BLOQUE CENTRAL BLANCO (contenedor equipos + info) ───
   const blockX = 60, blockW = W - 120;
-  const blockY = 520, blockH = 680;
+  const blockY = 430, blockH = 680;
   const blockR  = 32;
 
   // Sombra del bloque
@@ -302,7 +302,7 @@ function drawCard(d) {
   }
 
   // ── SEPARADOR DECORATIVO (entre bloque central y análisis) ─
-  const sepGuionY = blockY + blockH + 68;
+  const sepGuionY = blockY + blockH + 48;
 
   // Línea izquierda con gradiente
   const lineGrad = ctx.createLinearGradient(80, 0, W/2 - 70, 0);
@@ -327,7 +327,7 @@ function drawCard(d) {
   // ── GUION (análisis del partido) ─────────────────────────
   if (d.guion && d.guion.trim()) {
     const gX  = 80,  gW  = W - 160;
-    const gY  = sepGuionY + 56;
+    const gY  = sepGuionY + 44;
     const gH  = H - 210 - gY;
 
     // Fondo con gradiente sutil
