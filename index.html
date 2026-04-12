@@ -246,7 +246,7 @@ function drawCard(d) {
 
   // ── BLOQUE CENTRAL BLANCO (contenedor equipos + info) ───
   const blockX = 60, blockW = W - 120;
-  const blockY = 520, blockH = 820;
+  const blockY = 520, blockH = 680;
   const blockR  = 32;
 
   // Sombra del bloque
@@ -295,18 +295,10 @@ function drawCard(d) {
   // ── FECHA ────────────────────────────────────────────────
   const fechaY = infoY + infoH + 60;
   if (d.fecha) {
-    // Icono calendario (simple rectángulo)
-    const iconSize = 36;
-    const iconX = W/2 - ctx.measureText(formatFecha(d.fecha)).width/2 - iconSize - 14;
-    ctx.fillStyle = 'rgba(255,255,255,0.15)';
-    roundRect(ctx, iconX, fechaY - iconSize*0.8, iconSize, iconSize, 6); ctx.fill();
-    ctx.fillStyle = 'white'; ctx.font = '700 20px "Segoe UI", system-ui, sans-serif';
-    ctx.textAlign = 'center'; ctx.fillText('📅', iconX + iconSize/2, fechaY - iconSize*0.8 + 26);
-
     ctx.fillStyle = 'rgba(180,200,255,0.75)';
     ctx.font = '700 34px "Segoe UI", system-ui, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(formatFecha(d.fecha), W/2 + 14, fechaY);
+    ctx.fillText(formatFecha(d.fecha), W/2, fechaY);
   }
 
   // ── SEPARADOR DECORATIVO (entre bloque central y análisis) ─
