@@ -309,25 +309,70 @@ function drawCard(d) {
     ctx.fillText(formatFecha(d.fecha), W/2 + 14, fechaY);
   }
 
-  // ── GUION (texto análisis del partido) ──────────────────
+  // ── SEPARADOR DECORATIVO (entre bloque central y análisis) ─
+  const sepGuionY = blockY + blockH + 68;
+
+  // Línea izquierda con gradiente
+  const lineGrad = ctx.createLinearGradient(80, 0, W/2 - 70, 0);
+  lineGrad.addColorStop(0, 'rgba(96,165,250,0)');
+  lineGrad.addColorStop(1, 'rgba(96,165,250,0.45)');
+  ctx.strokeStyle = lineGrad; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(80, sepGuionY); ctx.lineTo(W/2 - 70, sepGuionY); ctx.stroke();
+
+  // Línea derecha con gradiente
+  const lineGrad2 = ctx.createLinearGradient(W/2 + 70, 0, W - 80, 0);
+  lineGrad2.addColorStop(0, 'rgba(96,165,250,0.45)');
+  lineGrad2.addColorStop(1, 'rgba(96,165,250,0)');
+  ctx.strokeStyle = lineGrad2;
+  ctx.beginPath(); ctx.moveTo(W/2 + 70, sepGuionY); ctx.lineTo(W - 80, sepGuionY); ctx.stroke();
+
+  // Icono central ✦
+  ctx.font = '700 32px "Segoe UI", system-ui, sans-serif';
+  ctx.fillStyle = 'rgba(96,165,250,0.70)';
+  ctx.textAlign = 'center';
+  ctx.fillText('\u2756', W/2, sepGuionY + 12);
+
+  // ── GUION (análisis del partido) ─────────────────────────
   if (d.guion && d.guion.trim()) {
-    const gX = 80, gW = W - 160;
-    const gY = fechaY + 60;
-    const gH = H - 220 - gY;   // hasta justo encima del footer
+    const gX  = 80,  gW  = W - 160;
+    const gY  = sepGuionY + 56;
+    const gH  = H - 210 - gY;
 
-    // Fondo del recuadro
-    ctx.fillStyle = 'rgba(255,255,255,0.04)';
-    roundRect(ctx, gX, gY, gW, gH, 24); ctx.fill();
-    ctx.strokeStyle = 'rgba(80,130,255,0.20)'; ctx.lineWidth = 1.5;
-    roundRect(ctx, gX, gY, gW, gH, 24); ctx.stroke();
+    // Fondo con gradiente sutil
+    const bgGrad = ctx.createLinearGradient(gX, gY, gX, gY + gH);
+    bgGrad.addColorStop(0,   'rgba(30, 58, 138, 0.55)');
+    bgGrad.addColorStop(1,   'rgba(15, 23,  60, 0.35)');
+    ctx.fillStyle = bgGrad;
+    roundRect(ctx, gX, gY, gW, gH, 28); ctx.fill();
 
-    // Texto con auto-ajuste de fuente y word-wrap
-    const maxTextW = gW - 64;
-    const padding  = 40;
-    let fs = 38;
-    ctx.font = `500 ${fs}px "Segoe UI", system-ui, sans-serif`;
+    // Borde con gradiente (azul claro → transparente)
+    const borderGrad = ctx.createLinearGradient(gX, gY, gX, gY + gH);
+    borderGrad.addColorStop(0,   'rgba(96,165,250,0.55)');
+    borderGrad.addColorStop(0.5, 'rgba(96,165,250,0.20)');
+    borderGrad.addColorStop(1,   'rgba(96,165,250,0.04)');
+    ctx.strokeStyle = borderGrad; ctx.lineWidth = 1.8;
+    roundRect(ctx, gX, gY, gW, gH, 28); ctx.stroke();
 
-    // Función que devuelve las líneas resultado de word-wrap
+    // Etiqueta superior "ANÁLISIS DEL PARTIDO"
+    const labelY = gY + 52;
+    ctx.font = '700 22px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(148,163,184,0.70)';
+    ctx.textAlign = 'center';
+    ctx.fillText('AN\u00C1LISIS DEL PARTIDO', gX + gW / 2, labelY);
+
+    // Línea fina bajo la etiqueta
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(gX + 60, labelY + 18);
+    ctx.lineTo(gX + gW - 60, labelY + 18);
+    ctx.stroke();
+
+    // Texto del análisis con auto-ajuste y word-wrap
+    const padH     = 60;
+    const padV     = 96;
+    const maxTextW = gW - padH * 2;
+    const textAreaH = gH - padV - 50;
+
     function wrapText(text, maxW) {
       const words = text.split(' ');
       const lines = [];
@@ -345,22 +390,20 @@ function drawCard(d) {
       return lines;
     }
 
-    // Reducir fuente hasta que todo el texto quepa verticalmente
-    let lines = [];
-    const maxLines = Math.floor((gH - padding * 2) / (fs * 1.35));
-    while (fs > 22) {
-      ctx.font = `500 ${fs}px "Segoe UI", system-ui, sans-serif`;
+    let fs = 38, lines = [];
+    while (fs > 20) {
+      ctx.font = `400 italic ${fs}px "Segoe UI", system-ui, sans-serif`;
       lines = wrapText(d.guion.trim(), maxTextW);
-      const lineH = fs * 1.45;
-      if (lines.length * lineH <= gH - padding * 2) break;
+      if (lines.length * fs * 1.50 <= textAreaH) break;
       fs -= 2;
     }
 
-    const lineH  = fs * 1.45;
+    const lineH  = fs * 1.55;
     const totalH = lines.length * lineH;
-    const startY = gY + (gH - totalH) / 2 + fs * 0.9;
+    const startY = gY + padV + (textAreaH - totalH) / 2 + fs * 0.85;
 
-    ctx.fillStyle = 'rgba(220,230,255,0.88)';
+    ctx.font      = `400 italic ${fs}px "Segoe UI", system-ui, sans-serif`;
+    ctx.fillStyle = 'rgba(200,215,255,0.78)';
     ctx.textAlign = 'center';
     lines.forEach((line, idx) => {
       ctx.fillText(line, gX + gW / 2, startY + idx * lineH);
